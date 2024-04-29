@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 import pyperclip
 import random
 
@@ -82,6 +82,44 @@ def on_decode():
     messagebox.showinfo("Decrypted Messages", "All possible decrypted messages copied to clipboard:\n\n" + decoded_message_str)
     entry_message.delete(0, tk.END)  # Clear the message entry
 
+# Function to open a file and process its contents
+def process_file():
+    file_path = filedialog.askopenfilename(title="Select a file", filetypes=[("Text Files", "*.txt")])
+    if file_path:
+        with open(file_path, 'r') as file:
+            file_contents = file.read()
+        operation = tk.simpledialog.askstring("Operation", "What would you like to do with the file contents?\nEncrypt, Decrypt, or Decode?", parent=root)
+        if operation is not None:
+            operation = operation.lower()
+            if operation == "encrypt":
+                key = tk.simpledialog.askinteger("Encryption Key", "Enter a key (1 - 25):", parent=root, minvalue=1, maxvalue=25)
+                if key is not None:
+                    encrypted_contents = encrypt(file_contents, key)
+                    save_file(encrypted_contents, "Encrypted File", "encrypted")
+                else:
+                    messagebox.showerror("Error", "Invalid key. Please enter a key (1 - 25).")
+            elif operation == "decrypt":
+                key = tk.simpledialog.askinteger("Decryption Key", "Enter a key (1 - 25):", parent=root, minvalue=1, maxvalue=25)
+                if key is not None:
+                    decrypted_contents = decrypt(file_contents, key)
+                    save_file(decrypted_contents, "Decrypted File", "decrypted")
+                else:
+                    messagebox.showerror("Error", "Invalid key. Please enter a key (1 - 25).")
+            elif operation == "decode":
+                decoded_messages = decode(file_contents)
+                decoded_message_str = "\n".join(decoded_messages)
+                save_file(decoded_message_str, "Decoded File", "decoded")
+            else:
+                messagebox.showerror("Error", "Invalid operation. Please choose Encrypt, Decrypt, or Decode.")
+
+# Function to save the processed contents to a file
+def save_file(contents, title, default_name):
+    file_path = filedialog.asksaveasfilename(title=title, defaultextension=".txt", initialfile=f"{default_name}_file.txt")
+    if file_path:
+        with open(file_path, 'w') as file:
+            file.write(contents)
+        messagebox.showinfo("Success", f"{title} saved successfully.")
+
 # Create the main window
 root = tk.Tk()
 root.title("Message Encryption")
@@ -98,7 +136,7 @@ label_key.grid(row=1, column=0, padx=5, pady=5)
 entry_key = tk.Entry(root, font=("Arial", 14))
 entry_key.grid(row=1, column=1, padx=5, pady=5)
 
-# Create buttons for encryption, decryption, decoding, and random key generation
+# Create buttons for encryption, decryption, decoding, random key generation, and file processing
 button_encrypt = tk.Button(root, text="Encrypt", command=on_encrypt, bg="light gray", font=("Garamond", 14), relief=tk.RIDGE)
 button_encrypt.grid(row=2, column=0, padx=5, pady=5)
 
@@ -110,6 +148,9 @@ button_decode.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
 
 button_generate = tk.Button(root, text="Generate Random Code", command=generate_random_code, bg="light gray", font=("Garamond", 14), relief=tk.RIDGE)
 button_generate.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
+
+button_process_file = tk.Button(root, text="Process File", command=process_file, bg="light gray", font=("Garamond", 14), relief=tk.RIDGE)
+button_process_file.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
 
 # Start the main event loop
 root.mainloop()
