@@ -1,5 +1,5 @@
 #my information
-name : adam
+name : adam ghodbane
 
 # Message Encryption/Decryption App
 
